@@ -1,6 +1,4 @@
-const _id =
-
-module.exports = {
+const _id = (module.exports = {
   env: {
     es2021: true,
     node: true,
@@ -22,6 +20,6 @@ module.exports = {
     sourceType: "module",
   },
   rules: {
-    "no-underscore-dangle": ["error", { "allow": ["_id"] }],
+    "no-underscore-dangle": ["error", { allow: ["_id"] }],
   },
-};
+});
