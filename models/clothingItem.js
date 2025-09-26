@@ -5,6 +5,8 @@ const user = require("./user");
 const clothingItemSchema = new mongoose.Schema({
   name: {
     type: String,
+    minlength: 2,
+    maxlength: 30,
     required: true,
   },
   weather: {
