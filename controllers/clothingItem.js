@@ -61,6 +61,10 @@ const deleteItem = (req, res) => {
     });
 };
 
+
+// Need to finish the likes in Postman
+// Not understanding the codes
+
 module.exports = {
   createItem,
   getItems,
