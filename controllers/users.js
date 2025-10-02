@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = require("../utils/config");
+const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -15,31 +15,41 @@ const getUsers = (req, res) => {
 const createUser = (req, res) => {
   const { name, email, password, avatar } = req.body;
 
-  bcrypt
-    .hash(password, 10)
-    .then((hash) => User.create({ name, email, password: hash, avatar }))
-    .then((user) => {
-      const userWithoutPassword = user.toObject();
-      delete userWithoutPassword.password;
+  User.findOne({ email }).then((user) => {
+    if (user) {
+      return res.status(409).send({ message: "Email already in use" });
+    }
 
-      res.status(201).send(userWithoutPassword);
-    })
-    .catch((err) => {
-      console.error(err);
+    return bcrypt
+      .hash(password, 10)
+      .then((hash) => User.create({ name, email, password: hash, avatar }))
+      .then((user) => {
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
 
-      if (err.code === 11000) {
-        return res.status(409).send({ message: err.message });
-      }
+        res.status(201).send(userWithoutPassword);
+      })
+      .catch((err) => {
+        console.error(err);
 
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+        if (err.code === 11000) {
+          return res.status(409).send({ message: err.message });
+        }
+
+        if (err.name === "ValidationError") {
+          return res.status(400).send({ message: err.message });
+        }
+        return res.status(500).send({ message: err.message });
+      });
+  });
 };
 
 const login = (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).send({ message: "Email and Password required" });
+  }
 
   User.findUserByCredentials(email, password)
     .then((user) => {
