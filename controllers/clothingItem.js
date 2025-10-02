@@ -68,8 +68,8 @@ const deleteItem = (req, res) => {
 
   ClothingItem.findById(itemId)
     .orFail()
-    .then((item) => {
-      if (item.owner.toString() !== req.user._id) {
+    .then((itemFound) => {
+      if (itemFound.owner.toString() !== req.user._id) {
         return res.status(403).send({ message: "You cannot delete this item" });
       }
 

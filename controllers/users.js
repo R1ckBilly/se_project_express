@@ -1,6 +1,6 @@
-const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
@@ -15,8 +15,8 @@ const getUsers = (req, res) => {
 const createUser = (req, res) => {
   const { name, email, password, avatar } = req.body;
 
-  User.findOne({ email }).then((user) => {
-    if (user) {
+  User.findOne({ email }).then((userFound) => {
+    if (userFound) {
       return res.status(409).send({ message: "Email already in use" });
     }
 
@@ -51,7 +51,7 @@ const login = (req, res) => {
     return res.status(400).send({ message: "Email and Password required" });
   }
 
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
