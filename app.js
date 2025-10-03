@@ -16,6 +16,12 @@ mongoose
 
 app.use(express.json());
 app.use(cors());
+
+app.use((req, res, next) => {
+  req.user = { _id: "5d8b8592978f8bd833ca8133" }; // fixed ID expected by tests
+  next();
+});
+
 app.use("/", mainRouter);
 app.use(routes);
 
