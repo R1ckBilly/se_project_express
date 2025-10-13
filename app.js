@@ -25,6 +25,19 @@ app.use((req, res, next) => {
 app.use("/", mainRouter);
 app.use(routes);
 
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  const { statusCode = 500, message } = err;
+
+  return res
+    .status(statusCode)
+    .send({
+      message:
+        statusCode === 500 ? "An error has occurred in the server" : message,
+    });
+});
+
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });
