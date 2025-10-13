@@ -6,7 +6,6 @@ const { JWT_SECRET } = require("../utils/config");
 const NotFoundError = require("../errors/not-found-err");
 const BadRequestError = require("../errors/bad-request-err");
 const ConflictError = require("../errors/conflict-err");
-const ForbiddenError = require("../errors/forbidden-err");
 const UnauthorizedError = require("../errors/unauthorized-err");
 
 const getUsers = (req, res, next) => {
@@ -18,10 +17,10 @@ const getUsers = (req, res, next) => {
 const createUser = (req, res, next) => {
   const { name, email, password, avatar } = req.body;
 
-  User.findOne({ email })
+  return User.findOne({ email })
     .then((userFound) => {
       if (userFound) {
-        return next(new ConflictError("Email already in use"));
+        throw new ConflictError("Email already in use");
       }
       return bcrypt.hash(password, 10);
     })
@@ -39,7 +38,7 @@ const createUser = (req, res, next) => {
       if (err.name === "ValidationError") {
         return next(new BadRequestError("Invalid user data"));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -58,28 +57,26 @@ const login = (req, res, next) => {
 
       res.send({ token });
     })
-    .catch((err) => {
-      return next(new UnauthorizedError("Invalid email or password"));
-    });
+    .catch(() => next(new UnauthorizedError("Invalid email or password")));
 };
 
 const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
-  User.findById(userId)
+  return User.findById(userId)
     .orFail(() => new NotFoundError("User not found"))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === "CastError") {
         return next(new BadRequestError("Invalid user ID format"));
       }
-      next(err);
+     return next(err);
     });
 };
 
 const updateCurrentUser = (req, res, next) => {
   const { name, avatar } = req.body;
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     req.user._id,
     { name, avatar },
     { new: true, runValidators: true }
@@ -93,7 +90,7 @@ const updateCurrentUser = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError("Invalid user ID format"));
       }
-      next(err);
+      return next(err);
     });
 };
 
