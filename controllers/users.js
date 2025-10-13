@@ -5,6 +5,9 @@ const { JWT_SECRET } = require("../utils/config");
 
 const NotFoundError = require("../errors/not-found-err");
 const BadRequestError = require("../errors/bad-request-err");
+const ConflictError = require("../errors/conflict-err");
+const ForbiddenError = require("../errors/forbidden-err");
+const UnauthorizedError = require("../errors/unauthorized-err");
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -18,7 +21,7 @@ const createUser = (req, res, next) => {
   User.findOne({ email })
     .then((userFound) => {
       if (userFound) {
-        throw new BadRequestError("Email already in use");
+        return next(new ConflictError("Email already in use"));
       }
       return bcrypt.hash(password, 10);
     })
@@ -31,11 +34,10 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        throw new BadRequestError("Email already exists");
+        return next(new ConflictError("Email already exists"));
       }
-
       if (err.name === "ValidationError") {
-        throw new BadRequestError("Invalid user data");
+        return next(new BadRequestError("Invalid user data"));
       }
       next(err);
     });
@@ -45,7 +47,7 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new BadRequestError("Email and password required");
+    return next(new BadRequestError("Email and password required"));
   }
 
   return User.findUserByCredentials(email, password)
@@ -57,8 +59,7 @@ const login = (req, res, next) => {
       res.send({ token });
     })
     .catch((err) => {
-      err.statusCode = 401;
-      next(err);
+      return next(new UnauthorizedError("Invalid email or password"));
     });
 };
 
@@ -68,17 +69,14 @@ const getCurrentUser = (req, res, next) => {
     .orFail(() => new NotFoundError("User not found"))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: err.message });
-      }
       if (err.name === "CastError") {
-        return res.status(400).send({ message: err.message });
+        return next(new BadRequestError("Invalid user ID format"));
       }
-      return res.status(500).send({ message: err.message });
+      next(err);
     });
 };
 
-const updateCurrentUser = (req, res) => {
+const updateCurrentUser = (req, res, next) => {
   const { name, avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -86,16 +84,16 @@ const updateCurrentUser = (req, res) => {
     { name, avatar },
     { new: true, runValidators: true }
   )
-    .orFail()
+    .orFail(() => new NotFoundError("User not found"))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: err.message });
-      }
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return next(new BadRequestError("Invalid user data"));
       }
-      return res.status(500).send({ message: err.message });
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid user ID format"));
+      }
+      next(err);
     });
 };
 

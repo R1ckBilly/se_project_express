@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const mainRouter = require("./routes/index");
 const routes = require("./routes");
+const errorHandler = require("./middlewares/error-handler");
+const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -17,26 +21,20 @@ mongoose
 app.use(express.json());
 app.use(cors());
 
+app.use(requestLogger);
+
 app.use((req, res, next) => {
-  req.user = { _id: "5d8b8592978f8bd833ca8133" }; // fixed ID expected by tests
+  req.user = { _id: "5d8b8592978f8bd833ca8133" };
   next();
 });
 
 app.use("/", mainRouter);
 app.use(routes);
 
-app.use((err, req, res, next) => {
-  console.error(err);
+app.use(errorLogger);
 
-  const { statusCode = 500, message } = err;
-
-  return res
-    .status(statusCode)
-    .send({
-      message:
-        statusCode === 500 ? "An error has occurred in the server" : message,
-    });
-});
+app.use(errors());
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
