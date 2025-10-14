@@ -10,7 +10,7 @@ const UnauthorizedError = require("../errors/unauthorized-err");
 
 const getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) => res.status(200).json(users))
     .catch(next);
 };
 
@@ -29,7 +29,7 @@ const createUser = (req, res, next) => {
       const userWithoutPassword = user.toObject();
       delete userWithoutPassword.password;
 
-      res.status(201).send(userWithoutPassword);
+      res.status(201).json(userWithoutPassword);
     })
     .catch((err) => {
       if (err.code === 11000) {
@@ -55,7 +55,7 @@ const login = (req, res, next) => {
         expiresIn: "7d",
       });
 
-      res.send({ token });
+      res.status(200).json({ token });
     })
     .catch(() => next(new UnauthorizedError("Invalid email or password")));
 };
@@ -64,12 +64,12 @@ const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   return User.findById(userId)
     .orFail(() => new NotFoundError("User not found"))
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.status(200).json(user))
     .catch((err) => {
       if (err.name === "CastError") {
         return next(new BadRequestError("Invalid user ID format"));
       }
-     return next(err);
+      return next(err);
     });
 };
 
@@ -82,10 +82,10 @@ const updateCurrentUser = (req, res, next) => {
     { new: true, runValidators: true }
   )
     .orFail(() => new NotFoundError("User not found"))
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.status(200).json(user))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return next(new BadRequestError("Invalid user data"));
+      if (err.name === "DocumentNotFoundError") {
+        return next(new NotFoundError("Invalid user data"));
       }
       if (err.name === "CastError") {
         return next(new BadRequestError("Invalid user ID format"));

@@ -40,6 +40,21 @@ const validateLogin = celebrate({
   }),
 });
 
+const validateUserUpdate = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30).messages({
+      "string.min": 'Name must be at least 2 characters',
+      "string.max": 'Name must be at most 30 characters',
+      "any.required": 'Name is required',
+    }),
+    avatar: Joi.string().required().custom(validateURL).messages({
+      "string.empty": 'Avatar URL is required',
+      "string.uri": 'Avatar must be a valid URL',
+      "any.required": 'Avatar is required',
+    }),
+  }),
+});
+
 const validateItemBody = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30).messages({
@@ -51,12 +66,15 @@ const validateItemBody = celebrate({
       "string.empty": 'Image URL is required',
       "string.uri": 'Image URL must be a valid URL',
     }),
+     weather: Joi.string().optional().messages({
+      "string.base": "Weather must be a string",
+    }),
   }),
 });
 
 const validateId = celebrate({
   params: Joi.object().keys({
-    id: Joi.string().length(24).hex().required().messages({
+    itemId: Joi.string().length(24).hex().required().messages({
       "string.length": 'ID must be 24 characters',
       "string.hex": 'ID must be hexadecimal',
       "any.required": 'ID is required',
@@ -69,6 +87,7 @@ module.exports = {
   validateURL,
   validateUserBody,
   validateLogin,
+  validateUserUpdate,
   validateItemBody,
   validateId,
 }
