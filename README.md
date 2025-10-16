@@ -1,4 +1,4 @@
-# WTWR (What to Wear?): Back End
+# whattowearexpress: Back End
 The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
 ## Running the Project
 `npm run start` — to launch the server 
@@ -11,3 +11,9 @@ Before committing your code, make sure you edit the file `sprint.txt` in the roo
 # Frontend repo link:
 
 https://github.com/R1ckBilly/se_project_react.git
+
+ ## Project Pitch Video
+
+ Check out this video where I describe my project and some challenges I faced while building it.
+
+  https://drive.google.com/file/d/1sGTWiQGNmtT5GrD0_W-jeF6DGop5szkF/view?usp=sharing
