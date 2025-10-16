@@ -11,7 +11,7 @@ const {
 router.post("/signin", validateLogin, login);
 router.post("/signup", validateUserBody, createUser);
 
-router.use(auth);
+// router.use(auth);
 router.use("/items", clothingItem);
 router.use("/users", userRouter);
 
