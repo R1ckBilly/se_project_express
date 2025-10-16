@@ -3,7 +3,6 @@ const clothingItem = require("./clothingItem");
 const { createUser, login } = require("../controllers/users");
 const userRouter = require("./users");
 // const auth = require("../middlewares/auth");
-const errors = require("../errors");
 const {
   validateUserBody,
   validateLogin,
