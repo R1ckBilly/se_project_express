@@ -3,16 +3,18 @@ const NotFoundError = require("../errors/not-found-err");
 const BadRequestError = require("../errors/bad-request-err");
 const ForbiddenError = require("../errors/forbidden-err");
 
+const { errorLogger, requestLogger } = require('../middlewares/logger');
+
 const createItem = (req, res, next) => {
-  console.log(req);
-  console.log(req.body);
+  requestLogger.info(req);
+  requestLogger.info(req.body);
 
   const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => res.status(201).json({ data: item }))
     .catch((err) => {
-      console.error(err);
+      errorLogger.error(err);
       if (err.name === "ValidationError") {
         return next(new BadRequestError(err.message));
       }
@@ -98,7 +100,7 @@ const dislikeItem = (req, res, next) =>
       res.status(200).json(item);
     })
     .catch((err) => {
-      console.error(err);
+      errorLogger.error(err);
       if (err.name === "CastError") {
         return next(new BadRequestError(err.message));
       }

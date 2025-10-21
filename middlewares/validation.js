@@ -66,7 +66,7 @@ const validateItemBody = celebrate({
       "string.empty": 'Image URL is required',
       "string.uri": 'Image URL must be a valid URL',
     }),
-     weather: Joi.string().optional().messages({
+     weather: Joi.string().required().messages({
       "string.base": "Weather must be a string",
     }),
   }),
